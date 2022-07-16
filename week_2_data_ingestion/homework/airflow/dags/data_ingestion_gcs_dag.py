@@ -77,7 +77,7 @@ def download_parquetize_upload_dag(
         )
 
         rm_task = BashOperator(
-            task_id = "rm_task"
+            task_id = "rm_task",
             bash_command = f"rm {local_parquet_path_template}"
         )
 
@@ -87,14 +87,14 @@ yellow_taxi_data_dag = DAG(
     dag_id="yellow_taxi_data_v2",
     schedule_interval="0 6 2 * *",
     start_date=datetime(2019, 1, 1),
-    end_date=datetime(2020,12,31)
+    end_date=datetime(2020,12,31),
     default_args=default_args,
     catchup=True,
     max_active_runs=3,
     tags=['dtc-de'],
 )
 
-donwload_parquetize_upload_dag(
+download_parquetize_upload_dag(
     dag=yellow_taxi_data_dag,
     url_template=YELLOW_TAXI_URL_TEMPLATE,
     local_parquet_path_template=YELLOW_TAXI_PARQUET_FILE_TEMPLATE,
