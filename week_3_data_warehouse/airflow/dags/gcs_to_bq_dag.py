@@ -3,9 +3,12 @@ import logging
 
 from airflow import DAG
 from airflow.utils.dates import days_ago
+
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator, BigQueryInsertJobOperator
+# GCS to GCS transfer service
 from airflow.providers.google.cloud.transfers.gcs_to_gcs import GCSToGCSOperator
 
+# Project and Bucket ID for GCP
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 BUCKET = os.environ.get("GCP_GCS_BUCKET")
 
@@ -35,6 +38,7 @@ with DAG(
 ) as dag:
 
     for colour, ds_col in COLOUR_RANGE.items():
+        # GCS to GCS task
         move_files_gcs_task = GCSToGCSOperator(
             task_id=f'move_{colour}_{DATASET}_files_task',
             source_bucket=BUCKET,
@@ -44,6 +48,7 @@ with DAG(
             move_object=True
         )
 
+        # Creating BigQuery External Table
         bigquery_external_table_task = BigQueryCreateExternalTableOperator(
             task_id=f"bq_{colour}_{DATASET}_external_table_task",
             table_resource={
@@ -67,7 +72,7 @@ with DAG(
             SELECT * FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
         )
 
-        # Create a partitioned table from external table
+        # Create a partitioned table from external table, performs within BQ query
         bq_create_partitioned_table_job = BigQueryInsertJobOperator(
             task_id=f"bq_create_{colour}_{DATASET}_partitioned_table_task",
             configuration={
