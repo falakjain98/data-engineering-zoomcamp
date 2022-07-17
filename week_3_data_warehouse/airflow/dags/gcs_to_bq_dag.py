@@ -13,7 +13,7 @@ path_to_local_home = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 BIGQUERY_DATASET = os.environ.get("BIGQUERY_DATASET", 'trips_data_all')
 
 DATASET = "tripdata"
-COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime', 'green': 'lpep_pickup_datetime'}
+COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime'} #, 'green': 'lpep_pickup_datetime'}
 INPUT_PART = "raw"
 INPUT_FILETYPE = "parquet"
 
