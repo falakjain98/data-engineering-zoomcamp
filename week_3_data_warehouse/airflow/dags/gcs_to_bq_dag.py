@@ -69,7 +69,7 @@ with DAG(
             f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET} \
             PARTITION BY DATE({ds_col}) \
             AS \
-            SELECT * FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
+            SELECT * REPLACE(NULL AS airport_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
         )
 
         # Create a partitioned table from external table, performs within BQ query
