@@ -30,6 +30,11 @@ FHV_URL_TEMPLATE = URL_PREFIX + '/fhv_tripdata_{{ execution_date.strftime(\'%Y-%
 FHV_PARQUET_FILE_TEMPLATE = AIRFLOW_HOME + '/fhv_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.parquet'
 FHV_GCS_PATH_TEMPLATE = "raw/fhv_tripdata/{{ execution_date.strftime(\'%Y\') }}/fhv_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.parquet"
 
+# Arguments for green taxi dag
+GREEN_TAXI_URL_TEMPLATE = URL_PREFIX + '/green_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.parquet'
+GREEN_TAXI_PARQUET_FILE_TEMPLATE = AIRFLOW_HOME + '/green_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.parquet'
+GREEN_TAXI_GCS_PATH_TEMPLATE = "raw/green_tripdata/{{ execution_date.strftime(\'%Y\') }}/green_tripdata_{{ execution_date.strftime(\'%Y-%m\') }}.parquet"
+
 # Arguments for zone table
 ZONES_URL_TEMPLATE = 'https://d37ci6vzurychx.cloudfront.net/misc/taxi+_zone_lookup.parquet'
 ZONES_PARQUET_FILE_TEMPLATE = AIRFLOW_HOME + "/taxi_zone_lookup.parquet"
@@ -102,12 +107,12 @@ download_parquetize_upload_dag(
     gcs_path_template=YELLOW_TAXI_GCS_PATH_TEMPLATE
 )
 
-# Run dag for fhv taxi
-fhv_taxi_data_dag = DAG(
-    dag_id="fhv_taxi_data",
+# Run dag for green taxi
+green_taxi_data_dag = DAG(
+    dag_id="green_taxi_data",
     schedule_interval="0 6 2 * *",
     start_date=datetime(2019, 1, 1),
-    end_date=datetime(2019,12,31),
+    end_date=datetime(2020,12,31),
     default_args=default_args,
     catchup=True,
     max_active_runs=3,
@@ -115,26 +120,45 @@ fhv_taxi_data_dag = DAG(
 )
 
 download_parquetize_upload_dag(
-    dag=fhv_taxi_data_dag,
-    url_template=FHV_URL_TEMPLATE,
-    local_parquet_path_template=FHV_PARQUET_FILE_TEMPLATE,
-    gcs_path_template=FHV_GCS_PATH_TEMPLATE
+    dag=green_taxi_data_dag,
+    url_template=GREEN_TAXI_URL_TEMPLATE,
+    local_parquet_path_template=GREEN_TAXI_PARQUET_FILE_TEMPLATE,
+    gcs_path_template=GREEN_TAXI_GCS_PATH_TEMPLATE
 )
 
-# Run dag for zones file
-zones_data_dag = DAG(
-    dag_id="zones_data",
-    schedule_interval="@once",
-    start_date=days_ago(1),
-    default_args=default_args,
-    catchup=True,
-    max_active_runs=3,
-    tags=['dtc-de'],
-)
+# # Run dag for fhv taxi
+# fhv_taxi_data_dag = DAG(
+#     dag_id="fhv_taxi_data",
+#     schedule_interval="0 6 2 * *",
+#     start_date=datetime(2019, 1, 1),
+#     end_date=datetime(2019,12,31),
+#     default_args=default_args,
+#     catchup=True,
+#     max_active_runs=3,
+#     tags=['dtc-de'],
+# )
 
-download_parquetize_upload_dag(
-    dag=zones_data_dag,
-    url_template=ZONES_URL_TEMPLATE,
-    local_parquet_path_template=ZONES_PARQUET_FILE_TEMPLATE,
-    gcs_path_template=ZONES_GCS_PATH_TEMPLATE
-)
+# download_parquetize_upload_dag(
+#     dag=fhv_taxi_data_dag,
+#     url_template=FHV_URL_TEMPLATE,
+#     local_parquet_path_template=FHV_PARQUET_FILE_TEMPLATE,
+#     gcs_path_template=FHV_GCS_PATH_TEMPLATE
+# )
+
+# # Run dag for zones file
+# zones_data_dag = DAG(
+#     dag_id="zones_data",
+#     schedule_interval="@once",
+#     start_date=days_ago(1),
+#     default_args=default_args,
+#     catchup=True,
+#     max_active_runs=3,
+#     tags=['dtc-de'],
+# )
+
+# download_parquetize_upload_dag(
+#     dag=zones_data_dag,
+#     url_template=ZONES_URL_TEMPLATE,
+#     local_parquet_path_template=ZONES_PARQUET_FILE_TEMPLATE,
+#     gcs_path_template=ZONES_GCS_PATH_TEMPLATE
+# )
