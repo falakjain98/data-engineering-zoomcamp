@@ -1,3 +1,4 @@
+-- creating view since we don't refresh very often
 {{ config(materialized='view') }}
 
 with tripdata as 
@@ -47,3 +48,6 @@ where rn = 1
   limit 100
 
 {% endif %}
+
+-- select * from {{ source('staging','green_tripdata') }}
+-- limit 100
