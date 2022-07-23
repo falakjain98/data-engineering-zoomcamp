@@ -16,7 +16,7 @@ path_to_local_home = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 BIGQUERY_DATASET = os.environ.get("BIGQUERY_DATASET", 'trips_data_all')
 
 DATASET = "tripdata"
-COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime', 'green': 'lpep_pickup_datetime'}
+COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime'}#, 'green': 'lpep_pickup_datetime'}
 INPUT_PART = "raw"
 INPUT_FILETYPE = "parquet"
 
@@ -29,7 +29,7 @@ default_args = {
 
 # NOTE: DAG declaration - using a Context Manager (an implicit way)
 with DAG(
-    dag_id="gcs_2_bq_dag",
+    dag_id="gcs_2_bq_dag_yellow",
     schedule_interval="@daily",
     default_args=default_args,
     catchup=False,
@@ -70,6 +70,76 @@ with DAG(
             PARTITION BY DATE({ds_col}) \
             AS \
             SELECT * REPLACE(NULL AS airport_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
+        )
+
+        # Create a partitioned table from external table, performs within BQ query
+        bq_create_partitioned_table_job = BigQueryInsertJobOperator(
+            task_id=f"bq_create_{colour}_{DATASET}_partitioned_table_task",
+            configuration={
+                "query": {
+                    "query": CREATE_BQ_TBL_QUERY,
+                    "useLegacySql": False,
+                }
+            }
+        )
+
+        move_files_gcs_task >> bigquery_external_table_task >> bq_create_partitioned_table_job
+
+DATASET = "tripdata"
+COLOUR_RANGE = {'green': 'lpep_pickup_datetime'}
+INPUT_PART = "raw"
+INPUT_FILETYPE = "parquet"
+
+default_args = {
+    "owner": "airflow",
+    "start_date": days_ago(1),
+    "depends_on_past": False,
+    "retries": 1,
+}
+
+# NOTE: DAG declaration - using a Context Manager (an implicit way)
+with DAG(
+    dag_id="gcs_2_bq_dag_green",
+    schedule_interval="@daily",
+    default_args=default_args,
+    catchup=False,
+    max_active_runs=1,
+    tags=['dtc-de'],
+) as dag:
+
+    for colour, ds_col in COLOUR_RANGE.items():
+        # GCS to GCS task
+        move_files_gcs_task = GCSToGCSOperator(
+            task_id=f'move_{colour}_{DATASET}_files_task',
+            source_bucket=BUCKET,
+            source_object=f'{INPUT_PART}/{colour}_{DATASET}*.{INPUT_FILETYPE}',
+            destination_bucket=BUCKET,
+            destination_object=f'{colour}/{colour}_{DATASET}',
+            move_object=True
+        )
+
+        # Creating BigQuery External Table
+        bigquery_external_table_task = BigQueryCreateExternalTableOperator(
+            task_id=f"bq_{colour}_{DATASET}_external_table_task",
+            table_resource={
+                "tableReference": {
+                    "projectId": PROJECT_ID,
+                    "datasetId": BIGQUERY_DATASET,
+                    "tableId": f"{colour}_{DATASET}_external_table",
+                },
+                "externalDataConfiguration": {
+                    "autodetect": "True",
+                    "sourceFormat": f"{INPUT_FILETYPE.upper()}",
+                    "sourceUris": [f"gs://{BUCKET}/{colour}/*"],
+                },
+            },
+        )
+
+        CREATE_BQ_TBL_QUERY = (
+            f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET} \
+            PARTITION BY DATE({ds_col}) \
+            AS \
+            SELECT * FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
         )
 
         # Create a partitioned table from external table, performs within BQ query
