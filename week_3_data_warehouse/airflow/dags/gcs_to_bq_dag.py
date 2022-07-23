@@ -16,7 +16,8 @@ path_to_local_home = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 BIGQUERY_DATASET = os.environ.get("BIGQUERY_DATASET", 'trips_data_all')
 
 DATASET = "tripdata"
-COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime'}#, 'green': 'lpep_pickup_datetime'}
+YELLOW_COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime'}#, 'green': 'lpep_pickup_datetime'}
+GREEN_COLOUR_RANGE = {'green': 'lpep_pickup_datetime'}
 INPUT_PART = "raw"
 INPUT_FILETYPE = "parquet"
 
@@ -37,7 +38,7 @@ with DAG(
     tags=['dtc-de'],
 ) as dag:
 
-    for colour, ds_col in COLOUR_RANGE.items():
+    for colour, ds_col in YELLOW_COLOUR_RANGE.items():
         # GCS to GCS task
         move_files_gcs_task = GCSToGCSOperator(
             task_id=f'move_{colour}_{DATASET}_files_task',
@@ -85,18 +86,6 @@ with DAG(
 
         move_files_gcs_task >> bigquery_external_table_task >> bq_create_partitioned_table_job
 
-DATASET = "tripdata"
-COLOUR_RANGE = {'green': 'lpep_pickup_datetime'}
-INPUT_PART = "raw"
-INPUT_FILETYPE = "parquet"
-
-default_args = {
-    "owner": "airflow",
-    "start_date": days_ago(1),
-    "depends_on_past": False,
-    "retries": 1,
-}
-
 # NOTE: DAG declaration - using a Context Manager (an implicit way)
 with DAG(
     dag_id="gcs_2_bq_dag_green",
@@ -107,7 +96,7 @@ with DAG(
     tags=['dtc-de'],
 ) as dag:
 
-    for colour, ds_col in COLOUR_RANGE.items():
+    for colour, ds_col in GREEN_COLOUR_RANGE.items():
         # GCS to GCS task
         move_files_gcs_task = GCSToGCSOperator(
             task_id=f'move_{colour}_{DATASET}_files_task',
@@ -139,7 +128,7 @@ with DAG(
             f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET} \
             PARTITION BY DATE({ds_col}) \
             AS \
-            SELECT * FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
+            SELECT * REPLACE(NULL as ehail_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
         )
 
         # Create a partitioned table from external table, performs within BQ query
