@@ -1,6 +1,4 @@
--- tables are more efficient since this will be exposed to BI tool
 {{ config(materialized='table') }}
-
 
 select 
     locationid, 
