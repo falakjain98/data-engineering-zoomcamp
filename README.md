@@ -99,7 +99,8 @@ To make discussions in Slack more organized:
 * dbt models
 * Testing and documenting
 * Deployment to the cloud and locally
-* Visualizing the data with google data studio and metabase 
+* Visualizing the data with google data studio and metabase
+* [Google Data Studio Report Link for Taxi Trips Data](https://datastudio.google.com/reporting/8a544443-027b-4643-9ea8-823ec0c49c77)
 
 
 [More details](week_4_analytics_engineering)

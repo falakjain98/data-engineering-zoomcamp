@@ -1,4 +1,4 @@
-Welcome to your new dbt project!
+[Google Data Studio Report Link for Taxi Trips Data](https://datastudio.google.com/reporting/8a544443-027b-4643-9ea8-823ec0c49c77)
 
 ### How to run this project 
 ### About the project
