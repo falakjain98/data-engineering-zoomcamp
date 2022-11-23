@@ -86,7 +86,7 @@ default_args = {
 
 #         move_files_gcs_task >> bigquery_external_table_task >> bq_create_partitioned_table_job
 
-# # NOTE: DAG declaration - using a Context Manager (an implicit way)
+# NOTE: DAG declaration - using a Context Manager (an implicit way)
 with DAG(
     dag_id="gcs_2_bq_dag_green",
     schedule_interval="@daily",
