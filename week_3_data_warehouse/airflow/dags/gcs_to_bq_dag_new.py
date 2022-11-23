@@ -152,7 +152,7 @@ def move_table_parition_dag(
     colour_range
 ):
     with dag:
-        for colour, ds_col in color_range.items():
+        for colour, ds_col in colour_range.items():
             # GCS to GCS task
             move_files_gcs_task = GCSToGCSOperator(
                 task_id=f'move_{colour}_{DATASET}_files_task',
@@ -180,14 +180,14 @@ def move_table_parition_dag(
                 },
             )
 
-            if color == 'yellow':
+            if colour == 'yellow':
                 CREATE_BQ_TBL_QUERY = (
                     f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET} \
                     PARTITION BY DATE({ds_col}) \
                     AS \
                     SELECT * REPLACE(NULL AS airport_fee) FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
                 )
-            elif color == 'green':
+            elif colour == 'green':
                 CREATE_BQ_TBL_QUERY = (
                     f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET} \
                     PARTITION BY DATE({ds_col}) \
