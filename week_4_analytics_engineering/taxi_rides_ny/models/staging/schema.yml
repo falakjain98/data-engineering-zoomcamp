@@ -4,7 +4,7 @@ version: 2
 sources:
     - name: staging
       #For bigquery:
-      database: copper-cider-354421
+      database: dtc-de-368104
       schema: trips_data_all
 
       # loaded_at_field: record_loaded_at
