@@ -100,7 +100,7 @@ To make discussions in Slack more organized:
 * Testing and documenting
 * Deployment to the cloud and locally
 * Visualizing the data with google data studio and metabase
-* [Google Data Studio Report Link for Taxi Trips Data](https://datastudio.google.com/reporting/8a544443-027b-4643-9ea8-823ec0c49c77)
+* [Google Data Studio Report Link for Taxi Trips Data](https://datastudio.google.com/reporting/d9c8aab0-4ab9-4acf-9444-0135a1eda5ae)
 
 
 [More details](week_4_analytics_engineering)
